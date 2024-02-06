@@ -1,0 +1,16 @@
+#!/bin/sh
+if [[ $BASH_SOURCE = */* ]]; then
+    osinfo=`uname -a`
+    lc_osinfo=`echo "$osinfo" | tr '[:upper:]' '[:lower:]'`
+    if [[ "$lc_osinfo" =~ "cygwin" ]]; then
+        sippdir=`cygpath -w ${BASH_SOURCE%/*}`
+    else
+        sippdir=${BASH_SOURCE%/*}
+    fi
+else
+    sippdir=.
+fi
+if ! test -f "$sippdir/Manifest.toml"; then
+    julia --project="$sippdir" -e 'using Pkg; Pkg.instantiate()'
+fi
+julia --project="$sippdir" -e 'using Sipp; Sipp.sipp()' -- $@
